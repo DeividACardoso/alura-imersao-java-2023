@@ -1,4 +1,6 @@
+import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -16,7 +18,7 @@ public class App {
         HttpRequest request = HttpRequest.newBuilder(endereco).GET().build();
         HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
         String body = response.body();
-        System.out.println(body);
+        //System.out.println(body);
 
         //Extrair só os dados que interessam (titulos, poster, classificação)
         JsonParser parser = new JsonParser();
@@ -25,17 +27,29 @@ public class App {
         //exibir e manipular os dados
         int contador = 1; 
         for (Map<String,String> filme : listaDeFilmes) {
+            
+            String urlImagem = filme.get("image");
+            String titulo = filme.get("title");
+
+            InputStream inputStream = new URL(urlImagem).openStream();
+            String nomeArquivo = titulo + ".png";   
+            
+            var geradoraDeFigurinhas = new GeradoraDeFigurinhas();
+            geradoraDeFigurinhas.cria(inputStream, nomeArquivo);
+
             System.out.println(contador + ".");
-            System.out.println("\u001b[1mTítulo:\u001b[m " + filme.get("title"));
-            System.out.println(filme.get("image"));
+            System.out.println("\u001b[1mTítulo:\u001b[m " + titulo);
+            //System.out.println(filme.get("image"));
             System.out.println("\u001b[1mClassifiação:\u001b[m " + filme.get("imDbRating"));
             double classificacao = Double.parseDouble(filme.get("imDbRating"));
+            
+            //Impressão de emojis
             int numeroEstrelinhas = (int) classificacao;
             for (int n = 0; n <= numeroEstrelinhas; n++) {
                 if(numeroEstrelinhas < 6){
                     System.out.println("🍅");
                 } else {
-                    if(numeroEstrelinhas < 4){
+                    if(numeroEstrelinhas <= 4){
                         System.out.println("👎");
                     }
                     if(numeroEstrelinhas > 5){
